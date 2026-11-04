@@ -125,12 +125,12 @@ function monitor(){
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
   const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>']);
   const name=active==='combined'?'Combined · equal weight':escapeHTML(active.slice(8));
-  const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%';
+  const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%</span>';
   const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
   const zero=span?clamp(-s.worst/span*100,0,100):50;
   const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
   const card='<div class="panel summary"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small>'+
-    '<div class="lead"><span>Cumulative return</span><strong class="'+(s.total<0?'neg':'')+'">'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
+    '<div class="lead"><span>Cumulative return</span><strong>'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
     '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+'</div>';
   const groups=[['Returns',[['Cumulative return',signed(s.total)],['Annualized return',signed(s.cagr)],['Best day',signed(s.best)],['Worst day',signed(s.worst)],['Positive days',percent(s.winRate)]]],
     ['Risk',[['Annualized volatility',percent(s.vol)],['Sharpe ratio',fmt(s.sharpe)],['Sortino ratio',fmt(s.sortino)],['Daily VaR 95%',signed(s.var95)],['Daily CVaR 95%',signed(s.cvar95)]]],
@@ -139,7 +139,7 @@ function monitor(){
   const metrics='<div class="panel"><h3>Performance metrics</h3><small>'+name+' · '+s.start+' to '+s.end+' · '+s.n+' observations</small><div class="mgrid">'+groups.map(([g,items])=>'<section><h4>'+g+'</h4><dl>'+items.map(([k,v])=>'<dt>'+k+'</dt><dd>'+v+'</dd>').join('')+'</dl></section>').join('')+'</div>'+
     '<details class="method"><summary>Calculation notes</summary><p>Each observation counts as one trading day; annualized figures use '+days+' per year. Daily VaR is the historical 5th percentile of daily returns and CVaR the mean of that tail. Sharpe and Sortino assume a zero risk-free rate. A drawdown’s length counts observations from the peak.</p></details></div>';
   const periods=drawdownPeriods(d).slice(0,5).map(p=>[p.start,p.end||'<span class="pill level-Watch">Ongoing</span>',signed(p.depth),p.length]);
-  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], pct1=v=>v==null?'—':'<span class="'+(v<0?'neg':'')+'">'+fmt(v*100,1,'%')+'</span>';
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], pct1=v=>v==null?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+fmt(v*100,1,'%')+'</span>';
   const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
     monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
   $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+

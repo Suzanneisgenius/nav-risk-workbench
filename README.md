@@ -47,7 +47,7 @@ The first successful import replaces the demo accounts. Further imports merge on
 
 | View | What to inspect |
 | --- | --- |
-| Account monitor | Account switcher, current level and review note, NAV with its signal strip above a drawdown-from-peak chart, a summary card (cumulative and annualized return, volatility, latest exposure, daily return range) over the five worst drawdowns, a full metrics grid (returns, risk, drawdown, exposure; Sharpe and Sortino at a zero risk-free rate, historical 95% VaR and CVaR), 3/5/10-observation slopes, exposure and volatility, monthly returns, and the latest 40 signal dates. |
+| Account monitor | Account switcher, current level and review note, NAV with its signal strip above a drawdown-from-peak chart, a summary card (cumulative and annualized return, volatility, latest exposure, daily return range; gains in green, losses in red) over the five worst drawdowns, a full metrics grid (returns, risk, drawdown, exposure; Sharpe and Sortino at a zero risk-free rate, historical 95% VaR and CVaR), 3/5/10-observation slopes, exposure and volatility, monthly returns, and the latest 40 signal dates. |
 | Stocks & bonds | Separate SPY/IEF course study with 5,536 aligned return observations. Compare historical periods and 30/90/252-session correlation windows, rebased returns and daily volatility. Export the selected period as CSV. |
 | Signal study | Five signal families, the lower-exposure comparison group, slope-gap buckets, and five-observation forward outcomes against the workspace baseline. |
 | Slope lab | Paste dated or undated NAV or equity values, run the independent warning check, and inspect the most recent 60 observations. |
