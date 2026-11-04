@@ -6,9 +6,9 @@ Explore an account’s daily NAV, drawdown and exposure in the browser. Hover ov
 
 ## Quick start · inspect one alert
 
-1. Open the demo and select **Demo Atlas** in the account monitor. Leave the score profile on **Balanced**.
-2. In **Alert history**, find **May 30, 2025**. Exposure was **49.35%**, and NAV fell **0.59%** from the previous observation. Two rules fired: *Rising exposure, falling NAV* and *High-exposure loss*.
-3. Switch from **Strict** to **Normal** and check the same row. Its score stays at **3.0**. Strict classifies it as **Elevated**, while Normal classifies it as **Watch**.
+1. Open the demo and choose **Explore a flagged date** under the title. It opens **Demo Atlas** and scrolls to **May 30, 2025** in **Alert history**. Leave the score profile on **Balanced**.
+2. The note above the table reads the row for you: exposure was **49.35%**, and NAV fell **0.59%** from the previous observation. Two rules fired: *Rising exposure, falling NAV* and *High-exposure loss*.
+3. Choose **Switch to Normal** in the note, or change the alert mode, and check the same row. Its score stays at **3.0**. Strict classifies it as **Elevated**, while Normal classifies it as **Watch**. The entry and the note appear only while the synthetic demo is loaded.
 
 ![Account monitor for the synthetic demo workspace](docs/account-monitor.png)
 

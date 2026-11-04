@@ -4,6 +4,7 @@ const state = JSON.parse($('state').textContent);
 let SCORE_CONFIG = state.config || structuredClone(FACTORY_SCORE_CONFIG);
 let DATA, combined, active, view = location.hash === '#stockbond' ? 'market' : 'monitor';
 let labResult = null;
+const CASE = {account:'Demo Atlas', date:'2025-05-30'}; // the guided demo case; shown only on synthetic data
 const charts = [];
 const ink = key => getComputedStyle(document.documentElement).getPropertyValue('--' + key).trim();
 const fmt = (v, digits=2, unit='') => v == null || !Number.isFinite(v) ? '—' : v.toFixed(digits) + unit;
@@ -54,6 +55,7 @@ function recalculate(){
   $('account').replaceChildren(...options.map(([id,n])=>new Option(n,id)));
   $('account').value=active;
   $('source').textContent=state.source;
+  $('tour').hidden=!state.demo;
   $('scope').textContent=names.length+' accounts · '+state.rows.length+' observations · '+(state.demo?'Generated NAV data':'Local upload');
   $('mode').value=state.mode;
   $('modeNote').textContent='Cutoffs for watch / elevated / high: '+['mid','elevated','critical'].map(cutoff).join(' / ')+' points. Normal adds one point to each cutoff.';
@@ -137,17 +139,23 @@ function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
   const days=Number(SCORE_CONFIG.capacity.tradingDaysPerYear)||252, s=summarize(d,days);
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
+  const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%</span>';
   const peakIdx=d.reduce((b,r,i)=>r.score>d[b].score?i:b,0), peak=d[peakIdx], hasPeak=peak.score>0;
-  const flagged=d.filter(r=>r.signals); let shown=flagged.slice(-40); if(hasPeak&&!shown.includes(peak))shown=[peak,...shown];
+  const caseRow=state.demo&&active==='account:'+CASE.account?d.find(r=>r.date===CASE.date&&r.signals):null, caseIdx=caseRow?d.indexOf(caseRow):-1;
+  const flagged=d.filter(r=>r.signals); let shown=flagged.slice(-40);
+  for(const extra of [peak,caseRow])if(extra&&extra.signals&&!shown.includes(extra))shown.push(extra);
+  shown.sort((a,b)=>a.date.localeCompare(b.date));
   const rows=shown.reverse().map(r=>{
     const row=[r.date+(r===peak?' <span class="pill level-High">Peak</span>':''),r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>'];
     if(r===peak){row.cls='peak';row.id='peakRow';}
+    if(r===caseRow){row.cls=(row.cls?row.cls+' ':'')+'case';row.id='caseRow';row[0]+=' <span class="pill level-Watch">Demo case</span>';}
     return row;
   });
   const peakline=hasPeak&&peak!==last?'<div class="peakline"><span class="pill level-'+peak.level+'">Peak</span><span>Highest score in this history: <b>'+peak.score+' points</b> on <b>'+peak.date+'</b> · '+peak.level+' · '+peak.signals.split('|').join(' · ')+'</span><a href="#peakRow">Show in alert history</a></div>':'';
   document.body.dataset.level=last.level;
+  const levelIn=(score,mode)=>{const m=state.mode;state.mode=mode;const l=levelFromScore(score);state.mode=m;return l;};
+  const caseNote=caseRow?'<div class="case"><b>Demo case · '+caseRow.date+'</b><span>Exposure '+fmt(caseRow.risk,1,'%')+(caseIdx>=3&&d[caseIdx-3].risk!=null?' (up from '+fmt(d[caseIdx-3].risk,1,'%')+' three observations earlier)':'')+' and NAV '+signed(caseRow.ret)+' on the day. '+caseRow.signals.split('|').length+' rule(s) fired: '+caseRow.signals.split('|').join(' · ')+'. Score '+fmt(caseRow.score,1)+' is '+levelIn(caseRow.score,'strict')+' in Strict and '+levelIn(caseRow.score,'normal')+' in Normal; the current mode is '+(state.mode==='strict'?'Strict':'Normal')+'.</span><button id="caseMode">Switch to '+(state.mode==='strict'?'Normal':'Strict')+'</button></div>':'';
   const name=active==='combined'?'Combined · equal weight':escapeHTML(active.slice(8));
-  const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%</span>';
   const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
   const zero=span?clamp(-s.worst/span*100,0,100):50;
   const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
@@ -176,10 +184,11 @@ function monitor(){
     '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+signed(s.maxDD)+' · now '+signed(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
     metrics+'<div class="pair">'+
     panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
-    '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first. The peak-score date is always included.</p>'+
+    '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first. The peak-score date is always included.</p>'+caseNote+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>'+
     '<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div>'+
     '<div class="panel"><h3>Monthly returns</h3><p>'+mnote+'</p>'+monthly+'</div>';
+  if($('caseMode'))$('caseMode').onclick=()=>{state.mode=state.mode==='strict'?'normal':'strict';recalculate();};
   plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
     borderWidth:2.6,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
     fill:'start',backgroundColor:ink('curve-fill')
@@ -403,6 +412,7 @@ function render(){
 }
 for(const b of document.querySelectorAll('[data-page]'))b.onclick=()=>{view=b.dataset.page;render();};
 $('account').onchange=e=>{active=e.target.value;render();};
+$('tourLink').onclick=e=>{e.preventDefault();view='monitor';active='account:'+CASE.account;recalculate();const row=$('caseRow');if(row)row.scrollIntoView({block:'center'});};
 $('mode').onchange=e=>{state.mode=e.target.value;recalculate();};
 $('theme').onclick=()=>{const doc=document.documentElement;doc.dataset.theme=doc.dataset.theme==='light'?'dark':'light';$('theme').textContent=doc.dataset.theme==='light'?'Dark theme':'Light theme';render();};
 $('upload').onchange=e=>upload(Array.from(e.target.files));
