@@ -75,7 +75,7 @@ function line(label,data,color,options={}){
 function plot(id,labels,sets,opts={}){
   const scales=opts.spark?{x:{display:false},y:{display:false}}:{
     x:{grid:{display:false},ticks:{color:ink('muted'),maxTicksLimit:6,maxRotation:0}},
-    y:{grid:{color:ink('grid')},ticks:{color:ink('muted'),maxTicksLimit:5},...opts.y}
+    y:{grid:{color:ink('grid')},...opts.y,ticks:{color:ink('muted'),maxTicksLimit:5,...(opts.y&&opts.y.ticks)}}
   };
   if(opts.monitor){
     scales.x.border={display:false};
@@ -138,9 +138,9 @@ function monitor(){
     '<div class="curve-caption"><b>'+(nav?'Net asset value':'Drawdown')+'</b><strong>'+(nav?fmt(last.nav,4):percent(last.dd))+'</strong><span>latest observation</span></div>'+
     '<div class="plot"><canvas id="navChart" role="img" aria-label="Account trajectory with signal dates marked along the time axis"></canvas></div>'+
     '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div></div><div class="pair">'+
-    panel('Momentum slopes','slopes','Change in NAV (%) per observation. Select a legend line to hide or show it.')+panel('Exposure and volatility','risk','Capital in use versus annualized 10-return volatility.')+'</div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
+    panel('Momentum slopes','slopes','Change in NAV (%) per observation. The 3-observation slope leads; the 10-observation slope is the reference it is compared with. Select a legend line to hide or show it.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
-  for(const [id,key,color] of [['sparkNav','nav','forest'],['sparkDD','dd','sage'],['sparkRisk','risk','forest'],['sparkVol','vol','fern']]){
+  for(const [id,key,color] of [['sparkNav','nav','s1'],['sparkDD','dd','s2'],['sparkRisk','risk','s1'],['sparkVol','vol','s3']]){
     plot(id,labels,[line(key,d.map(r=>r[key]),color)],{spark:true});
   }
   plot('navChart',labels,[line(nav?'NAV':'Drawdown (%)',d.map(r=>nav?r.nav:r.dd*100),nav?'forest':'sage',{
@@ -151,8 +151,8 @@ function monitor(){
     return r.signals?r.level+' · '+r.score+' points\n'+r.signals.replace(/\|/g,' · '):'';
   }});
   plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe),{monitor:true});
-  plot('risk',labels,[line('Exposure',d.map(r=>r.risk),'forest',{borderWidth:2.5}),
-    line('Volatility',d.map(r=>r.vol==null?null:r.vol*100),'fern',{yAxisID:'y1',borderDash:[7,4]})],{dual:true,monitor:true});
+  plot('risk',labels,[line('Exposure (%)',d.map(r=>r.risk),'s1',{borderWidth:2})],{monitor:true,y:{ticks:{maxTicksLimit:3}}});
+  plot('vol',labels,[line('Annualized volatility (%)',d.map(r=>r.vol==null?null:r.vol*100),'s3',{borderWidth:2})],{monitor:true,y:{ticks:{maxTicksLimit:3}}});
   for(const b of document.querySelectorAll('[data-nav]')){
     b.classList.toggle('active',b.dataset.nav===navMetric);
     b.setAttribute('aria-pressed',String(b.dataset.nav===navMetric));
@@ -161,10 +161,10 @@ function monitor(){
 }
 function slopeSets(rows,gap){
   return [
-    line('3 obs',rows.map(r=>r.s3),'forest',{borderWidth:2.6}),
-    line('5 obs',rows.map(r=>r.s5),'fern',{borderDash:[6,4]}),
-    line('10 obs',rows.map(r=>r.s10),'sage',{borderWidth:1.8,borderDash:[10,3,2,3]}),
-    line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'reference',{borderWidth:1.4,borderDash:[2,4]})
+    line('3 obs',rows.map(r=>r.s3),'s1',{borderWidth:2.2}),
+    line('10 obs',rows.map(r=>r.s10),'s2',{borderWidth:2}),
+    line('5 obs',rows.map(r=>r.s5),'s3',{borderWidth:1.4,borderDash:[5,4]}),
+    line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'reference',{borderWidth:1.2,borderDash:[2,4]})
   ];
 }
 function renderSignals(){
@@ -187,9 +187,9 @@ function renderMarket(){
   const w=windows[0], rolling=cache.rolling[w].slice(lo,hi).filter(n=>n!=null);
   const corr=sbPearson(rows.map(r=>r[1]),rows.map(r=>r[2]));
   $('market').innerHTML='<div class="metrics">'+metric('Trading dates',rows.length.toLocaleString('en-US'),labels[0]+' to '+labels.at(-1))+metric('Period correlation',fmt(corr),'Pearson · daily returns')+metric('Latest correlation',fmt(rolling.at(-1)),w+'-session window')+metric('Positive windows',percent(rolling.filter(v=>v>0).length/rolling.length),w+' sessions')+'</div><p>Full-history daily return correlation: '+fmt(cache.fullCorr)+'. Compare periods and windows to see how sensitive the estimate is to sample choice.</p>'+panel('Rolling return correlation','cor','Correlation ranges from −1 to +1.')+'<div class="pair">'+panel('Cumulative returns','growth','Each ETF is rebased to zero at the first selected close. Values in %.')+panel('Rolling daily volatility','volatility','30-session sample standard deviation, in %.')+'</div>';
-  plot('cor',labels,[...windows.map(n=>line(n+' sessions',cache.rolling[n].slice(lo,hi),({30:'forest',90:'sage',252:'fern'})[n],{borderDash:n===30?[]:n===90?[7,4]:[2,4]})),line('Zero',labels.map(()=>0),'reference',{borderDash:[4,4],borderWidth:1})],{y:{min:-1,max:1}});
-  plot('growth',labels,[line('SPY',sbRebasedReturns(rows,1),'forest'),line('IEF',sbRebasedReturns(rows,2),'sage',{borderDash:[7,4]})]);
-  plot('volatility',labels,[line('SPY',cache.vol.stock.slice(lo,hi),'forest'),line('IEF',cache.vol.bond.slice(lo,hi),'sage',{borderDash:[7,4]})]);
+  plot('cor',labels,[...windows.map(n=>line(n+' sessions',cache.rolling[n].slice(lo,hi),({30:'s1',90:'s2',252:'s3'})[n],{borderWidth:n===30?2:1.6,borderDash:n===30?[]:n===90?[7,4]:[2,4]})),line('Zero',labels.map(()=>0),'reference',{borderDash:[4,4],borderWidth:1})],{y:{min:-1,max:1}});
+  plot('growth',labels,[line('SPY',sbRebasedReturns(rows,1),'s1'),line('IEF',sbRebasedReturns(rows,2),'s2')]);
+  plot('volatility',labels,[line('SPY',cache.vol.stock.slice(lo,hi),'s1'),line('IEF',cache.vol.bond.slice(lo,hi),'s2')]);
 }
 function download(name,body,type){
   const url=URL.createObjectURL(new Blob([body],{type})),a=document.createElement('a');
