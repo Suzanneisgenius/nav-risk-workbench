@@ -64,7 +64,7 @@ function metric(label,value,note,spark=''){
 }
 function table(head,rows, numeric=[]){
   const cell = (tag,x,i)=>'<'+tag+' class="'+(numeric.includes(i)?'num':'')+'">'+x+'</'+tag+'>';
-  return '<div class="table"><table><thead><tr>'+head.map((h,i)=>cell('th',h,i)).join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map((x,i)=>cell('td',x,i)).join('')+'</tr>').join('')+'</tbody></table></div>';
+  return '<div class="table"><table><thead><tr>'+head.map((h,i)=>cell('th',h,i)).join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr'+(row.cls?' class="'+row.cls+'"':'')+(row.id?' id="'+row.id+'"':'')+'>'+row.map((x,i)=>cell('td',x,i)).join('')+'</tr>').join('')+'</tbody></table></div>';
 }
 function panel(title,id,note=''){
   return '<div class="panel"><h3>'+title+'</h3><p>'+note+'</p><div class="plot"><canvas id="'+id+'" role="img" aria-label="'+title+'"></canvas></div></div>';
@@ -87,7 +87,7 @@ function plot(id,labels,sets,opts={}){
     };
     scales.y.border={display:false};
   }
-  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},plugins:opts.signalRows?[signalStrip(opts.signalRows)]:[],options:{
+  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},plugins:[...(opts.signalRows?[signalStrip(opts.signalRows)]:[]),...(opts.marker?[peakMarker(opts.marker)]:[])],options:{
     animation:false,responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales,
     plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:23,boxHeight:1,padding:11}},
       tooltip:{enabled:!opts.spark,callbacks:{afterBody:opts.afterBody||(()=> '')}}}
@@ -119,19 +119,43 @@ function signalStrip(rows){
     args.changed=true;
   }};
 }
+// A dashed vertical rule with a label at the highest-scoring observation.
+function peakMarker({index,label}){
+  return {id:'peakMarker',afterDatasetsDraw(chart){
+    const {ctx,chartArea:{top,bottom,right},scales}=chart, x=scales.x.getPixelForValue(index);
+    ctx.save();ctx.strokeStyle=ink('red');ctx.lineWidth=1.2;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,bottom);ctx.stroke();ctx.setLineDash([]);
+    ctx.font='600 11px '+getComputedStyle(document.body).fontFamily;
+    const w=ctx.measureText(label).width+12, flip=x+w+8>right, bx=flip?x-7-w:x+7, by=top+4;
+    ctx.fillStyle=ink('paper');ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(bx,by,w,19,4);ctx.fill();ctx.stroke();
+    ctx.fillStyle=ink('red');ctx.textBaseline='middle';ctx.fillText(label,bx+6,by+10);
+    ctx.restore();
+  }};
+}
 function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
   const days=Number(SCORE_CONFIG.capacity.tradingDaysPerYear)||252, s=summarize(d,days);
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
-  const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>']);
+  const peakIdx=d.reduce((b,r,i)=>r.score>d[b].score?i:b,0), peak=d[peakIdx], hasPeak=peak.score>0;
+  const flagged=d.filter(r=>r.signals); let shown=flagged.slice(-40); if(hasPeak&&!shown.includes(peak))shown=[peak,...shown];
+  const rows=shown.reverse().map(r=>{
+    const row=[r.date+(r===peak?' <span class="pill level-High">Peak</span>':''),r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>'];
+    if(r===peak){row.cls='peak';row.id='peakRow';}
+    return row;
+  });
+  const peakline=hasPeak&&peak!==last?'<div class="peakline"><span class="pill level-'+peak.level+'">Peak</span><span>Highest score in this history: <b>'+peak.score+' points</b> on <b>'+peak.date+'</b> · '+peak.level+' · '+peak.signals.split('|').join(' · ')+'</span><a href="#peakRow">Show in alert history</a></div>':'';
+  document.body.dataset.level=last.level;
   const name=active==='combined'?'Combined · equal weight':escapeHTML(active.slice(8));
   const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%</span>';
   const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
   const zero=span?clamp(-s.worst/span*100,0,100):50;
   const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
+  const back=k=>k<d.length?last.nav/d[d.length-1-k].nav-1:null, yPrev=d.findLastIndex(r=>r.date.slice(0,4)<last.date.slice(0,4));
+  const byPeriod='<div class="periods">'+[['1D',back(1)],['1W',back(5)],['1M',back(21)],['3M',back(63)],['YTD',yPrev>=0?last.nav/d[yPrev].nav-1:back(d.length-1)],['All',s.total]].map(([l,v])=>'<div><small>'+l+'</small><b>'+signed(v)+'</b></div>').join('')+'</div>';
   const card='<div class="panel summary"><header class="summary-head"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small></header>'+
     '<div class="lead"><span>Cumulative return</span><strong>'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
-    '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+'</div>';
+    '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+byPeriod+'</div>';
   const groups=[['Returns',[['Cumulative return',signed(s.total)],['Annualized return',signed(s.cagr)],['Best day',signed(s.best)],['Worst day',signed(s.worst)],['Positive days',percent(s.winRate)]]],
     ['Risk',[['Annualized volatility',percent(s.vol)],['Sharpe ratio',fmt(s.sharpe)],['Sortino ratio',fmt(s.sortino)],['Daily VaR 95%',signed(s.var95)],['Daily CVaR 95%',signed(s.cvar95)]]],
     ['Drawdown',[['Max drawdown',signed(s.maxDD)],['Longest drawdown',s.longest?s.longest+' obs':'—'],['Calmar ratio',fmt(s.calmar)],['Current drawdown',signed(last.dd)]]],
@@ -140,23 +164,26 @@ function monitor(){
     '<details class="method"><summary>Calculation notes</summary><p>Each observation counts as one trading day; annualized figures use '+days+' per year. Daily VaR is the historical 5th percentile of daily returns and CVaR the mean of that tail. Sharpe and Sortino assume a zero risk-free rate. A drawdown’s length counts observations from the peak.</p></details></div>';
   const periods=drawdownPeriods(d).slice(0,5).map(p=>[p.start,p.end||'<span class="pill level-Watch">Ongoing</span>',signed(p.depth),p.length]);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], pct1=v=>v==null?'—':'<span class="'+(v>0?'pos':v<0?'neg':'')+'">'+fmt(v*100,1,'%')+'</span>';
+  const my=monthlyReturns(d), mlist=my.flatMap(y=>Object.entries(y.months).map(([m,v])=>({label:months[m-1]+' '+y.year,v})));
+  const mbest=mlist.reduce((b,x)=>x.v>b.v?x:b,mlist[0]), mworst=mlist.reduce((b,x)=>x.v<b.v?x:b,mlist[0]);
+  const mnote=mlist.length?'Positive months: '+mlist.filter(x=>x.v>0).length+' of '+mlist.length+'. Best '+mbest.label+' ('+signed(mbest.v,1)+'), worst '+mworst.label+' ('+signed(mworst.v,1)+'). Chained from the daily returns inside each calendar month.':'Chained from the daily returns inside each calendar month.';
   const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
-    monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
-  $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+
+    my.map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
+  $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+peakline+
     card+'<div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
     '<div class="plot"><canvas id="navChart" role="img" aria-label="Net asset value with signal dates marked along the time axis"></canvas></div>'+
     '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div>'+
     '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+signed(s.maxDD)+' · now '+signed(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
     metrics+'<div class="pair">'+
     panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
-    '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
+    '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first. The peak-score date is always included.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>'+
     '<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div>'+
-    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>';
+    '<div class="panel"><h3>Monthly returns</h3><p>'+mnote+'</p>'+monthly+'</div>';
   plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
     borderWidth:2.6,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
     fill:'start',backgroundColor:ink('curve-fill')
-  })],{monitor:true,signalRows:d,afterBody:items=>{
+  })],{monitor:true,signalRows:d,marker:hasPeak?{index:peakIdx,label:'Peak '+peak.score+' pts · '+peak.date}:null,afterBody:items=>{
     const r=d[items[0].dataIndex];
     return r.signals?r.level+' · '+r.score+' points\n'+r.signals.replace(/\|/g,' · '):'';
   }});
@@ -368,6 +395,7 @@ function template(){
 }
 function render(){
   while(charts.length)charts.pop().destroy();
+  delete document.body.dataset.level;
   for(const el of document.querySelectorAll('[data-view]'))el.hidden=el.dataset.view!==view;
   for(const b of document.querySelectorAll('[data-page]')){b.classList.toggle('active',b.dataset.page===view);b.setAttribute('aria-current',b.dataset.page===view?'page':'false');}
   $('workspace').hidden=view==='market';

@@ -1,6 +1,6 @@
 # NAV Risk Workbench
 
-Explore daily account NAV, drawdown and exposure in a browser. Hover over a flagged date to see which rules fired, then compare how Strict and Normal modes classify the same observation. The demo starts with three synthetic accounts and runs entirely on your device.
+Explore an account’s daily NAV, drawdown and exposure in the browser. Hover over a flagged date to see which rules fired, then compare how Strict and Normal modes classify the same observation. The demo starts with three synthetic accounts and runs entirely on your device.
 
 **[Open the interactive demo](https://suzanneisgenius.github.io/nav-risk-workbench/)** · [Download the standalone HTML](https://raw.githubusercontent.com/Suzanneisgenius/nav-risk-workbench/main/index.html) · [Demo CSV](data/demo-accounts.csv) · [Demo SQLite database](data/demo.sqlite)
 
@@ -14,7 +14,9 @@ Explore daily account NAV, drawdown and exposure in a browser. Hover over a flag
 
 ## Read the account report
 
-The NAV chart marks signal dates along its time axis. The drawdown chart below it measures the distance from the running peak. Use the five worst drawdowns to inspect the length and depth of individual declines.
+The status bar gives the latest level and score. Beneath it, the peak line names the highest-scoring date in the loaded history; the same date is marked on the NAV chart and highlighted in **Alert history**. When the latest observation is **High**, the status bar and the page frame turn red.
+
+The summary card shows cumulative and annualized return, volatility, latest exposure, the daily return range, and **returns by period**: the change over the last 1, 5, 21 and 63 observations, year to date, and the full history. The NAV chart marks signal dates along its time axis. The drawdown chart below it measures the distance from the running peak. Use the five worst drawdowns to inspect the length and depth of individual declines.
 
 The **Performance metrics** section shows all 17 measures for the selected account and date range.
 
