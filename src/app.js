@@ -124,13 +124,21 @@ function monitor(){
   const days=Number(SCORE_CONFIG.capacity.tradingDaysPerYear)||252, s=summarize(d,days);
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
   const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>']);
-  const kv=(label,value)=>'<tr><th>'+label+'</th><td>'+value+'</td></tr>', group=name=>'<tr class="group"><th colspan="2">'+name+'</th></tr>';
-  const summary='<table class="kv">'+
-    group('Returns')+kv('Cumulative return',percent(s.total))+kv('Annualized return',percent(s.cagr))+kv('Best day',percent(s.best))+kv('Worst day',percent(s.worst))+kv('Positive days',percent(s.winRate))+
-    group('Risk')+kv('Annualized volatility',percent(s.vol))+kv('Sharpe ratio',fmt(s.sharpe))+kv('Sortino ratio',fmt(s.sortino))+kv('Daily VaR 95%',percent(s.var95))+kv('Daily CVaR 95%',percent(s.cvar95))+
-    group('Drawdown')+kv('Max drawdown',percent(s.maxDD))+kv('Longest drawdown',s.longest?s.longest+' obs':'—')+kv('Calmar ratio',fmt(s.calmar))+kv('Current drawdown',percent(last.dd))+
-    group('Exposure')+kv('Latest exposure',fmt(last.risk,1,'%'))+kv('Average exposure',fmt(s.avgRisk,1,'%'))+kv('Peak exposure',fmt(s.maxRisk,1,'%'))+'</table>';
-  const periods=drawdownPeriods(d).slice(0,5).map(p=>[p.start,p.trough,p.end||'<span class="pill level-Watch">Ongoing</span>',percent(p.depth),p.length]);
+  const name=active==='combined'?'Combined · equal weight':escapeHTML(active.slice(8));
+  const signed=(v,digits=2)=>v==null||!Number.isFinite(v)?'—':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(digits)+'%';
+  const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
+  const zero=span?clamp(-s.worst/span*100,0,100):50;
+  const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
+  const card='<div class="panel summary"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small>'+
+    '<div class="lead"><span>Cumulative return</span><strong class="'+(s.total<0?'neg':'')+'">'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
+    '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+'</div>';
+  const groups=[['Returns',[['Cumulative return',signed(s.total)],['Annualized return',signed(s.cagr)],['Best day',signed(s.best)],['Worst day',signed(s.worst)],['Positive days',percent(s.winRate)]]],
+    ['Risk',[['Annualized volatility',percent(s.vol)],['Sharpe ratio',fmt(s.sharpe)],['Sortino ratio',fmt(s.sortino)],['Daily VaR 95%',signed(s.var95)],['Daily CVaR 95%',signed(s.cvar95)]]],
+    ['Drawdown',[['Max drawdown',signed(s.maxDD)],['Longest drawdown',s.longest?s.longest+' obs':'—'],['Calmar ratio',fmt(s.calmar)],['Current drawdown',signed(last.dd)]]],
+    ['Exposure',[['Latest exposure',fmt(last.risk,1,'%')],['Average exposure',fmt(s.avgRisk,1,'%')],['Peak exposure',fmt(s.maxRisk,1,'%')]]]];
+  const metrics='<div class="panel"><h3>Performance metrics</h3><small>'+name+' · '+s.start+' to '+s.end+' · '+s.n+' observations</small><div class="mgrid">'+groups.map(([g,items])=>'<section><h4>'+g+'</h4><dl>'+items.map(([k,v])=>'<dt>'+k+'</dt><dd>'+v+'</dd>').join('')+'</dl></section>').join('')+'</div>'+
+    '<details class="method"><summary>Calculation notes</summary><p>Each observation counts as one trading day; annualized figures use '+days+' per year. Daily VaR is the historical 5th percentile of daily returns and CVaR the mean of that tail. Sharpe and Sortino assume a zero risk-free rate. A drawdown’s length counts observations from the peak.</p></details></div>';
+  const periods=drawdownPeriods(d).slice(0,5).map(p=>[p.start,p.end||'<span class="pill level-Watch">Ongoing</span>',signed(p.depth),p.length]);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], pct1=v=>v==null?'—':'<span class="'+(v<0?'neg':'')+'">'+fmt(v*100,1,'%')+'</span>';
   const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
     monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
@@ -138,11 +146,11 @@ function monitor(){
     '<div class="tear"><div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
     '<div class="plot"><canvas id="navChart" role="img" aria-label="Net asset value with signal dates marked along the time axis"></canvas></div>'+
     '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div>'+
-    '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+percent(s.maxDD)+' · now '+percent(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
-    '<div class="panel summary"><h3>Performance summary</h3>'+summary+'<small class="foot">Each observation counts as one trading day; annualized figures use '+days+' per year. VaR and CVaR are the historical 5th percentile of daily returns and the mean below it. Sharpe and Sortino assume a zero risk-free rate.</small></div></div><div class="pair">'+
+    '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+signed(s.maxDD)+' · now '+signed(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
+    '<div class="side">'+card+'<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div></div></div>'+
+    metrics+'<div class="pair">'+
     panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
-    '<div class="tear2"><div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Trough','Recovered','Depth','Length'],periods,[3,4]):'<p>No drawdown in this series.</p>')+'</div>'+
-    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div></div>'+
+    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>'+
     '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
   plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
