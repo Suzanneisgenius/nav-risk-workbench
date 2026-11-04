@@ -77,40 +77,95 @@ function plot(id,labels,sets,opts={}){
     x:{grid:{display:false},ticks:{color:ink('muted'),maxTicksLimit:6,maxRotation:0}},
     y:{grid:{color:ink('grid')},ticks:{color:ink('muted'),maxTicksLimit:5},...opts.y}
   };
-  if(opts.dual) scales.y1={position:'right',grid:{display:false},ticks:{color:ink('muted'),maxTicksLimit:5}};
-  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},options:{
+  if(opts.monitor){
+    scales.x.border={display:false};
+    scales.x.ticks.padding=opts.signalRows?12:5;
+    scales.x.ticks.callback=function(value){
+      const date=this.getLabelForValue(value);
+      return labels[0].slice(0,4)===labels.at(-1).slice(0,4)
+        ? date.slice(5,7)+'/'+date.slice(8,10) : date;
+    };
+    scales.y.border={display:false};
+  }
+  if(opts.dual){
+    scales.y.title={display:true,text:'Exposure (%)',color:ink('blue')};
+    scales.y.ticks.color=ink('blue');
+    scales.y1={position:'right',grid:{display:false},border:{display:false},
+      ticks:{color:ink('amber'),maxTicksLimit:5},title:{display:true,text:'Volatility (%)',color:ink('amber')}};
+  }
+  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},plugins:opts.signalRows?[signalStrip(opts.signalRows)]:[],options:{
     animation:false,responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales,
-    plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:14}},
+    plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:23,boxHeight:1,padding:11}},
       tooltip:{enabled:!opts.spark,callbacks:{afterBody:opts.afterBody||(()=> '')}}}
   }}));
 }
+// Place flags on their own strip so consecutive signals never obscure the NAV line.
+function signalStrip(rows){
+  const palette={Low:ink('muted'),Watch:ink('muted'),Elevated:ink('amber'),High:ink('red')};
+  return {id:'signalStrip',afterDatasetsDraw(chart){
+    const {ctx,chartArea,scales}=chart, y=chartArea.bottom+6;
+    ctx.save();
+    ctx.lineCap='round';
+    rows.forEach((r,i)=>{
+      if(!r.signals)return;
+      const x=scales.x.getPixelForValue(i);
+      ctx.strokeStyle=palette[r.level];
+      ctx.lineWidth=r.level==='High'?3:2;
+      const height=r.level==='High'?9:r.level==='Elevated'?6:4;
+      ctx.beginPath();ctx.moveTo(x,y-height/2);ctx.lineTo(x,y+height/2);ctx.stroke();
+    });
+    ctx.restore();
+  },afterEvent(chart,args){
+    const {x,y,type}=args.event,{left,right,bottom}=chart.chartArea;
+    if(type==='mouseout'||x<left||x>right||y<=bottom||y>bottom+12)return;
+    const index=chart.scales.x.getValueForPixel(x);
+    if(!rows[index]?.signals)return;
+    const point=chart.getDatasetMeta(0).data[index];
+    chart.tooltip.setActiveElements([{datasetIndex:0,index}],{x:point.x,y:point.y});
+    args.changed=true;
+  }};
+}
 function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
+  const nav=navMetric==='nav';
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
   const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—',r.level]);
   $('monitor').innerHTML='<div class="riskline"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div><div class="metrics">'+
     metric('Net asset value',fmt(last.nav,4),'Peak '+fmt(Math.max(...d.map(r=>r.nav)),4),'sparkNav')+
     metric('Drawdown',percent(last.dd),'Worst '+percent(Math.min(...d.map(r=>r.dd))),'sparkDD')+
     metric('Exposure',fmt(last.risk,1,'%'),'Capital / equity','sparkRisk')+metric('Annualized volatility',percent(last.vol),'10-return window','sparkVol')+'</div>'+
-    '<div class="panel"><div class="top"><div><h3>Account trajectory</h3><small>Markers identify signal dates. Hover for details.</small></div><div class="seg"><button data-nav="nav">NAV</button><button data-nav="dd">Drawdown</button></div></div><div class="plot"><canvas id="navChart" aria-label="Account trajectory"></canvas></div></div><div class="pair">'+
-    panel('Momentum slopes','slopes','Slope as % of current NAV per observation.')+panel('Exposure and volatility','risk','Exposure % on the left, annualized volatility % on the right.')+'</div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
+    '<div class="panel trajectory"><div class="top"><div><h3>Account trajectory</h3><small>'+d[0].date+' to '+last.date+'</small></div><div class="seg"><button data-nav="nav">NAV</button><button data-nav="dd">Drawdown</button></div></div>'+
+    '<div class="curve-caption"><b>'+(nav?'Net asset value':'Drawdown')+'</b><strong>'+(nav?fmt(last.nav,4):percent(last.dd))+'</strong><span>latest observation</span></div>'+
+    '<div class="plot"><canvas id="navChart" role="img" aria-label="Account trajectory with signal dates marked along the time axis"></canvas></div>'+
+    '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div></div><div class="pair">'+
+    panel('Momentum slopes','slopes','Change in NAV (%) per observation. Select a legend line to hide or show it.')+panel('Exposure and volatility','risk','Capital in use versus annualized 10-return volatility.')+'</div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
   for(const [id,key,color] of [['sparkNav','nav','accent'],['sparkDD','dd','amber'],['sparkRisk','risk','blue'],['sparkVol','vol','accent']]){
     plot(id,labels,[line(key,d.map(r=>r[key]),color)],{spark:true});
   }
-  const nav=navMetric==='nav';
   plot('navChart',labels,[line(nav?'NAV':'Drawdown (%)',d.map(r=>nav?r.nav:r.dd*100),nav?'accent':'amber',{
-    pointRadius:d.map(r=>r.signals?3:0),pointBackgroundColor:d.map(r=>ink(r.level==='High'?'red':r.level==='Elevated'?'amber':'accent'))
-  })],{afterBody:items=>d[items[0].dataIndex].signals.replace(/\|/g,' · ')});
-  plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe));
-  plot('risk',labels,[line('Exposure (%)',d.map(r=>r.risk),'blue'),line('Volatility (%)',d.map(r=>r.vol==null?null:r.vol*100),'amber',{yAxisID:'y1',borderDash:[4,3]})],{dual:true});
+    borderWidth:2.8,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
+    fill:'start',backgroundColor:ink(nav?'accent':'amber')+'0b'
+  })],{monitor:true,signalRows:d,afterBody:items=>{
+    const r=d[items[0].dataIndex];
+    return r.signals?r.level+' · '+r.score+' points\n'+r.signals.replace(/\|/g,' · '):'';
+  }});
+  plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe),{monitor:true});
+  plot('risk',labels,[line('Exposure',d.map(r=>r.risk),'blue',{borderWidth:2.5}),
+    line('Volatility',d.map(r=>r.vol==null?null:r.vol*100),'amber',{yAxisID:'y1',borderDash:[7,4]})],{dual:true,monitor:true});
   for(const b of document.querySelectorAll('[data-nav]')){
     b.classList.toggle('active',b.dataset.nav===navMetric);
+    b.setAttribute('aria-pressed',String(b.dataset.nav===navMetric));
     b.onclick=()=>{navMetric=b.dataset.nav;render();};
   }
 }
 function slopeSets(rows,gap){
-  return [line('3 observations',rows.map(r=>r.s3),'accent'),line('5 observations',rows.map(r=>r.s5),'amber'),line('10 observations',rows.map(r=>r.s10),'blue'),line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'muted',{borderDash:[3,3]})];
+  return [
+    line('3 obs',rows.map(r=>r.s3),'accent',{borderWidth:2.6}),
+    line('5 obs',rows.map(r=>r.s5),'amber',{borderDash:[6,4]}),
+    line('10 obs',rows.map(r=>r.s10),'blue',{borderWidth:1.8,borderDash:[10,3,2,3]}),
+    line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'muted',{borderWidth:1.4,borderDash:[2,4]})
+  ];
 }
 function renderSignals(){
   const law=computeLaws(), defs=[

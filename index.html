@@ -6,6 +6,18 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}header,main{max-width:1410px;margin:auto}header,.brand,.actions,.bar,.mode,.filters,.title,footer,.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap}header{padding:17px 3%;justify-content:space-between}.brand svg{width:35px;color:var(--accent)}h1{font-size:23px;letter-spacing:-.045em;margin:0}main{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:0 clamp(16px,3vw,44px);width:96%;margin-bottom:20px}nav{display:flex;gap:6px;border-bottom:1px solid var(--line);padding:10px 0;flex-wrap:wrap}button,.file,select,input{font:inherit}button,.file,select{border:1px solid var(--line);color:var(--ink);background:var(--paper);border-radius:6px;padding:6px 11px;font-weight:550;cursor:pointer}button:hover,.file:hover{background:var(--tint);border-color:var(--muted)}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.file:focus-within{outline:2px solid var(--accent);outline-offset:2px}.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}.primary:hover{background:var(--ink);color:var(--paper)}nav button{border-color:transparent;background:transparent;color:var(--muted)}nav button.active,.seg button.active{color:var(--ink);background:var(--tint);border-color:var(--line)}.file{position:relative}.file input{height:1px;width:1px;opacity:0;position:absolute}.bar{justify-content:space-between;background:var(--tint);padding:12px 16px;border-radius:8px}.actions{gap:8px}#workspace{margin:20px 0}.mode{margin-top:10px;gap:10px}.mode span,.muted,p,footer,.hint{color:var(--muted)}p{margin:5px 0 12px;max-width:87ch}label{font-weight:600}select{padding:5px 8px;max-width:100%}output{display:block;color:var(--accent)}output.error{color:var(--red)}.title{justify-content:space-between;margin:22px 0 12px}.title p{margin-bottom:0}h2,h3,h4{margin:0;color:var(--ink);line-height:1.22}h2{font-size:27px;letter-spacing:-.04em}h3{font-size:18px;letter-spacing:-.02em}h4{font-size:15px}section[data-view]{padding-bottom:20px}.panel,details{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-top:12px;min-width:0}.panel p:last-child,details p:last-child{margin-bottom:0}.riskline{padding:10px 15px;border-left:3px solid var(--accent);background:var(--tint)}.riskline b{margin-right:8px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0;border-block:1px solid var(--line)}.metric{padding:13px 14px}.metric+.metric{border-left:1px solid var(--line)}.metric b{font-size:26px;display:block;letter-spacing:-.04em;font-weight:550}.metric small,.hint,small{color:var(--muted)}.spark{position:relative;height:22px;margin-top:5px}.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.plot{position:relative;height:230px}.pair .plot{height:195px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}.legend{font-size:13px;color:var(--muted);gap:15px;margin:6px 0}.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}.seg{display:flex}.seg button{font-size:13px}.table{overflow:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:550}td.num,th.num{text-align:right}td.wrap{white-space:normal;min-width:160px}.filters,.settings-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:10px}summary{cursor:pointer;font-weight:600}details p{margin-top:10px}textarea{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:5px;width:100%;height:170px;padding:10px;font-size:15px;margin:8px 0;resize:vertical}input[type=number]{width:80px;color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:5px;border-radius:4px}.barchart{display:grid;gap:9px}.bucket{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:8px}.bucket i{height:8px;background:var(--accent);display:block}.bucket span:last-child{text-align:right}footer{border-top:1px solid var(--line);padding:16px 0;font-size:13px;justify-content:space-between}.level-High{color:var(--red)}.level-Elevated,.level-Watch{color:var(--amber)}.level-Low{color:var(--good)}[hidden]{display:none!important}a{color:var(--accent)}
 @media(max-width:760px){header{padding:10px 14px}h1{font-size:19px}main{width:100%;border-radius:0;border-inline:0}.pair{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:nth-child(3){border-left:0}.bar,.title{align-items:flex-start}.panel{padding:12px}.plot{height:210px}nav{gap:2px}nav button{font-size:13px;padding:6px}.mode{align-items:flex-start;flex-direction:column}.bucket{grid-template-columns:102px 1fr 68px;font-size:13px}.settings-controls label{font-size:14px}.metric b{font-size:22px}}
 .uploadHelp{margin:8px 0;padding:0;border:0;font-size:13px}.uploadHelp summary{color:var(--muted)}
+.trajectory .plot{height:245px}
+.curve-caption,.signal-key,.signal-key span{display:flex;align-items:center;gap:8px}
+.curve-caption{margin:8px 0;color:var(--muted);font-size:13px}
+.curve-caption b{color:var(--ink);font-weight:550}.curve-caption strong{color:var(--ink);font-size:19px}
+.signal-key{flex-wrap:wrap;gap:9px 16px;margin-top:5px;color:var(--muted);font-size:12px}
+.signal-key b{color:var(--ink)}.signal-key i{width:2px;height:5px;background:var(--muted);border-radius:2px}
+.signal-key .elevated{height:7px;background:var(--amber)}.signal-key .high{width:3px;height:9px;background:var(--red)}
+.trajectory .seg{gap:2px;background:var(--tint);border-radius:6px;padding:2px}
+.trajectory .seg button{background:transparent;border-color:transparent}
+.trajectory .seg button.active{background:var(--ink);color:var(--paper)}
+#monitor .pair .plot{height:215px}
+@media(max-width:760px){.trajectory .plot{height:205px}.signal-key{gap:7px 12px}}
 </style></head>
 <body>
 <header><div class="brand"><svg viewBox="0 0 36 30" aria-hidden="true"><path d="M2 23h32M3 20l8-7 6 2L32 3" fill="none" stroke="currentColor" stroke-width="3"/></svg><h1>NAV Risk Workbench</h1></div><button id="theme">Dark theme</button></header>
@@ -383,40 +395,95 @@ function plot(id,labels,sets,opts={}){
     x:{grid:{display:false},ticks:{color:ink('muted'),maxTicksLimit:6,maxRotation:0}},
     y:{grid:{color:ink('grid')},ticks:{color:ink('muted'),maxTicksLimit:5},...opts.y}
   };
-  if(opts.dual) scales.y1={position:'right',grid:{display:false},ticks:{color:ink('muted'),maxTicksLimit:5}};
-  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},options:{
+  if(opts.monitor){
+    scales.x.border={display:false};
+    scales.x.ticks.padding=opts.signalRows?12:5;
+    scales.x.ticks.callback=function(value){
+      const date=this.getLabelForValue(value);
+      return labels[0].slice(0,4)===labels.at(-1).slice(0,4)
+        ? date.slice(5,7)+'/'+date.slice(8,10) : date;
+    };
+    scales.y.border={display:false};
+  }
+  if(opts.dual){
+    scales.y.title={display:true,text:'Exposure (%)',color:ink('blue')};
+    scales.y.ticks.color=ink('blue');
+    scales.y1={position:'right',grid:{display:false},border:{display:false},
+      ticks:{color:ink('amber'),maxTicksLimit:5},title:{display:true,text:'Volatility (%)',color:ink('amber')}};
+  }
+  charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},plugins:opts.signalRows?[signalStrip(opts.signalRows)]:[],options:{
     animation:false,responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales,
-    plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:14}},
+    plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:23,boxHeight:1,padding:11}},
       tooltip:{enabled:!opts.spark,callbacks:{afterBody:opts.afterBody||(()=> '')}}}
   }}));
 }
+// Place flags on their own strip so consecutive signals never obscure the NAV line.
+function signalStrip(rows){
+  const palette={Low:ink('muted'),Watch:ink('muted'),Elevated:ink('amber'),High:ink('red')};
+  return {id:'signalStrip',afterDatasetsDraw(chart){
+    const {ctx,chartArea,scales}=chart, y=chartArea.bottom+6;
+    ctx.save();
+    ctx.lineCap='round';
+    rows.forEach((r,i)=>{
+      if(!r.signals)return;
+      const x=scales.x.getPixelForValue(i);
+      ctx.strokeStyle=palette[r.level];
+      ctx.lineWidth=r.level==='High'?3:2;
+      const height=r.level==='High'?9:r.level==='Elevated'?6:4;
+      ctx.beginPath();ctx.moveTo(x,y-height/2);ctx.lineTo(x,y+height/2);ctx.stroke();
+    });
+    ctx.restore();
+  },afterEvent(chart,args){
+    const {x,y,type}=args.event,{left,right,bottom}=chart.chartArea;
+    if(type==='mouseout'||x<left||x>right||y<=bottom||y>bottom+12)return;
+    const index=chart.scales.x.getValueForPixel(x);
+    if(!rows[index]?.signals)return;
+    const point=chart.getDatasetMeta(0).data[index];
+    chart.tooltip.setActiveElements([{datasetIndex:0,index}],{x:point.x,y:point.y});
+    args.changed=true;
+  }};
+}
 function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
+  const nav=navMetric==='nav';
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
   const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—',r.level]);
   $('monitor').innerHTML='<div class="riskline"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div><div class="metrics">'+
     metric('Net asset value',fmt(last.nav,4),'Peak '+fmt(Math.max(...d.map(r=>r.nav)),4),'sparkNav')+
     metric('Drawdown',percent(last.dd),'Worst '+percent(Math.min(...d.map(r=>r.dd))),'sparkDD')+
     metric('Exposure',fmt(last.risk,1,'%'),'Capital / equity','sparkRisk')+metric('Annualized volatility',percent(last.vol),'10-return window','sparkVol')+'</div>'+
-    '<div class="panel"><div class="top"><div><h3>Account trajectory</h3><small>Markers identify signal dates. Hover for details.</small></div><div class="seg"><button data-nav="nav">NAV</button><button data-nav="dd">Drawdown</button></div></div><div class="plot"><canvas id="navChart" aria-label="Account trajectory"></canvas></div></div><div class="pair">'+
-    panel('Momentum slopes','slopes','Slope as % of current NAV per observation.')+panel('Exposure and volatility','risk','Exposure % on the left, annualized volatility % on the right.')+'</div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
+    '<div class="panel trajectory"><div class="top"><div><h3>Account trajectory</h3><small>'+d[0].date+' to '+last.date+'</small></div><div class="seg"><button data-nav="nav">NAV</button><button data-nav="dd">Drawdown</button></div></div>'+
+    '<div class="curve-caption"><b>'+(nav?'Net asset value':'Drawdown')+'</b><strong>'+(nav?fmt(last.nav,4):percent(last.dd))+'</strong><span>latest observation</span></div>'+
+    '<div class="plot"><canvas id="navChart" role="img" aria-label="Account trajectory with signal dates marked along the time axis"></canvas></div>'+
+    '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div></div><div class="pair">'+
+    panel('Momentum slopes','slopes','Change in NAV (%) per observation. Select a legend line to hide or show it.')+panel('Exposure and volatility','risk','Capital in use versus annualized 10-return volatility.')+'</div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
   for(const [id,key,color] of [['sparkNav','nav','accent'],['sparkDD','dd','amber'],['sparkRisk','risk','blue'],['sparkVol','vol','accent']]){
     plot(id,labels,[line(key,d.map(r=>r[key]),color)],{spark:true});
   }
-  const nav=navMetric==='nav';
   plot('navChart',labels,[line(nav?'NAV':'Drawdown (%)',d.map(r=>nav?r.nav:r.dd*100),nav?'accent':'amber',{
-    pointRadius:d.map(r=>r.signals?3:0),pointBackgroundColor:d.map(r=>ink(r.level==='High'?'red':r.level==='Elevated'?'amber':'accent'))
-  })],{afterBody:items=>d[items[0].dataIndex].signals.replace(/\|/g,' · ')});
-  plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe));
-  plot('risk',labels,[line('Exposure (%)',d.map(r=>r.risk),'blue'),line('Volatility (%)',d.map(r=>r.vol==null?null:r.vol*100),'amber',{yAxisID:'y1',borderDash:[4,3]})],{dual:true});
+    borderWidth:2.8,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
+    fill:'start',backgroundColor:ink(nav?'accent':'amber')+'0b'
+  })],{monitor:true,signalRows:d,afterBody:items=>{
+    const r=d[items[0].dataIndex];
+    return r.signals?r.level+' · '+r.score+' points\n'+r.signals.replace(/\|/g,' · '):'';
+  }});
+  plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe),{monitor:true});
+  plot('risk',labels,[line('Exposure',d.map(r=>r.risk),'blue',{borderWidth:2.5}),
+    line('Volatility',d.map(r=>r.vol==null?null:r.vol*100),'amber',{yAxisID:'y1',borderDash:[7,4]})],{dual:true,monitor:true});
   for(const b of document.querySelectorAll('[data-nav]')){
     b.classList.toggle('active',b.dataset.nav===navMetric);
+    b.setAttribute('aria-pressed',String(b.dataset.nav===navMetric));
     b.onclick=()=>{navMetric=b.dataset.nav;render();};
   }
 }
 function slopeSets(rows,gap){
-  return [line('3 observations',rows.map(r=>r.s3),'accent'),line('5 observations',rows.map(r=>r.s5),'amber'),line('10 observations',rows.map(r=>r.s10),'blue'),line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'muted',{borderDash:[3,3]})];
+  return [
+    line('3 obs',rows.map(r=>r.s3),'accent',{borderWidth:2.6}),
+    line('5 obs',rows.map(r=>r.s5),'amber',{borderDash:[6,4]}),
+    line('10 obs',rows.map(r=>r.s10),'blue',{borderWidth:1.8,borderDash:[10,3,2,3]}),
+    line('Watch threshold',rows.map(r=>r.s10==null?null:r.s10-gap),'muted',{borderWidth:1.4,borderDash:[2,4]})
+  ];
 }
 function renderSignals(){
   const law=computeLaws(), defs=[
