@@ -1,23 +1,24 @@
 <!doctype html>
 <html lang="en" data-theme="light">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NAV Risk Workbench</title>
-<style>:root{color-scheme:light;--bg:#eef3ed;--paper:#fbfcf8;--tint:#f0f5ed;--ink:#253c30;--muted:#53665a;--line:#d5e0d5;--accent:#377053;--forest:#286347e6;--sage:#456f51cf;--fern:#587139c7;--reference:#7c867f;--s1:#1f8a57;--s2:#2a78d6;--s3:#d9780f;--axis-forest:#316547;--axis-fern:#4d6234;--curve-fill:#52895e0e;--amber:#986017;--red:#a3333c;--good:#25724f;--grid:#e1e9df;font:15px/1.48 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
-[data-theme=dark]{color-scheme:dark;--bg:#142023;--paper:#1e2c2f;--tint:#243639;--ink:#e7f0ef;--muted:#b1c4c5;--line:#405154;--accent:#74cfcd;--forest:#8cd9afe8;--sage:#a1c5accf;--fern:#c0d88bcf;--reference:#97a39c;--s1:#2ea36b;--s2:#3987e5;--s3:#d17f14;--axis-forest:#a1d6b2;--axis-fern:#c0d88b;--curve-fill:#94cfa712;--amber:#f1bc76;--red:#ff9c9e;--good:#83c9a4;--grid:#344346}
+<style>:root{color-scheme:light;--bg:#eef3ed;--paper:#fbfcf8;--tint:#f0f5ed;--ink:#253c30;--muted:#53665a;--line:#d5e0d5;--accent:#377053;--forest:#286347e6;--sage:#456f51cf;--fern:#587139c7;--reference:#7c867f;--s1:#1f8a57;--s2:#2a78d6;--s3:#d9780f;--dd-fill:#2a78d61c;--curve-fill:#52895e0e;--amber:#986017;--red:#a3333c;--good:#25724f;--grid:#e1e9df;font:15px/1.48 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+[data-theme=dark]{color-scheme:dark;--bg:#142023;--paper:#1e2c2f;--tint:#243639;--ink:#e7f0ef;--muted:#b1c4c5;--line:#405154;--accent:#74cfcd;--forest:#8cd9afe8;--sage:#a1c5accf;--fern:#c0d88bcf;--reference:#97a39c;--s1:#2ea36b;--s2:#3987e5;--s3:#d17f14;--dd-fill:#3987e526;--curve-fill:#94cfa712;--amber:#f1bc76;--red:#ff9c9e;--good:#83c9a4;--grid:#344346}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}header,main{max-width:1410px;margin:auto}header,.brand,.actions,.bar,.mode,.filters,.title,footer,.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap}header{padding:17px 3%;justify-content:space-between}.brand{align-items:flex-start}.brand svg{width:35px;flex:none;margin-top:4px;color:var(--accent)}h1{font-size:23px;letter-spacing:-.045em;margin:0}.lede{margin:3px 0 0;font-size:14px;line-height:1.45;color:var(--muted);max-width:62ch}main{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:0 clamp(16px,3vw,44px);width:96%;margin-bottom:20px}nav{display:flex;gap:6px;border-bottom:1px solid var(--line);padding:10px 0;flex-wrap:wrap}button,.file,select,input{font:inherit}button,.file,select{border:1px solid var(--line);color:var(--ink);background:var(--paper);border-radius:6px;padding:6px 11px;font-weight:550;cursor:pointer}button:hover,.file:hover{background:var(--tint);border-color:var(--muted)}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.file:focus-within{outline:2px solid var(--accent);outline-offset:2px}.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}.primary:hover{background:var(--ink);color:var(--paper)}nav button{border-color:transparent;background:transparent;color:var(--muted)}nav button.active,.seg button.active{color:var(--ink);background:var(--tint);border-color:var(--line)}nav button.active{box-shadow:inset 0 -2px 0 var(--accent)}.file{position:relative}.file input{height:1px;width:1px;opacity:0;position:absolute}.bar{justify-content:space-between;background:var(--tint);padding:12px 16px;border-radius:8px}.actions{gap:8px}#workspace{margin:20px 0}.mode{margin-top:10px;gap:10px}.mode span,.muted,p,footer,.hint{color:var(--muted)}p{margin:5px 0 12px;max-width:87ch}label{font-weight:600}select{padding:5px 8px;max-width:100%}output{display:block;color:var(--accent)}output.error{color:var(--red)}.title{justify-content:space-between;margin:22px 0 12px}.title p{margin-bottom:0}h2,h3,h4{margin:0;color:var(--ink);line-height:1.22}h2{font-size:27px;letter-spacing:-.04em}h3{font-size:18px;letter-spacing:-.02em}h4{font-size:15px}section[data-view]{padding-bottom:20px}.panel,details{border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-top:12px;min-width:0}.panel p:last-child,details p:last-child{margin-bottom:0}.riskline{padding:10px 15px;border-left:3px solid var(--accent);background:var(--tint)}.riskline.level-Low{border-left-color:var(--good)}.riskline.level-Watch,.riskline.level-Elevated{border-left-color:var(--amber)}.riskline.level-High{border-left-color:var(--red)}.riskline b{margin-right:8px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0;border-block:1px solid var(--line)}.metric{padding:13px 14px}.metric+.metric{border-left:1px solid var(--line)}.metric b{font-size:26px;display:block;letter-spacing:-.04em;font-weight:550}.metric small,.hint,small{color:var(--muted)}.spark{position:relative;height:22px;margin-top:5px}.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.plot{position:relative;height:230px}.pair .plot{height:195px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}.legend{font-size:13px;color:var(--muted);gap:15px;margin:6px 0}.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}.seg{display:flex}.seg button{font-size:13px}.table{overflow:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:550}td.num,th.num{text-align:right}td.wrap{white-space:normal;min-width:160px}.filters,.settings-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:10px}summary{cursor:pointer;font-weight:600}details p{margin-top:10px}textarea{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:5px;width:100%;height:170px;padding:10px;font-size:15px;margin:8px 0;resize:vertical}input[type=number]{width:80px;color:var(--ink);background:var(--paper);border:1px solid var(--line);padding:5px;border-radius:4px}.barchart{display:grid;gap:9px}.bucket{display:grid;grid-template-columns:136px 1fr 150px;align-items:center;gap:8px}.bucket small{color:var(--muted);margin-left:8px;font-variant-numeric:tabular-nums}.bucket i{height:8px;background:var(--accent);display:block}.bucket span:last-child{text-align:right}footer{border-top:1px solid var(--line);padding:16px 0;font-size:13px;justify-content:space-between}.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--tint);line-height:1.4}.level-High{color:var(--red)}.level-Elevated,.level-Watch{color:var(--amber)}.level-Low{color:var(--good)}[hidden]{display:none!important}a{color:var(--accent)}
 @media(max-width:760px){header{padding:10px 14px}h1{font-size:19px}main{width:100%;border-radius:0;border-inline:0}.pair{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:nth-child(3){border-left:0}.bar,.title{align-items:flex-start}.panel{padding:12px}.plot{height:210px}nav{gap:2px}nav button{font-size:13px;padding:6px}.mode{align-items:flex-start;flex-direction:column}.bucket{grid-template-columns:102px 1fr 112px;font-size:13px}.settings-controls label{font-size:14px}.metric b{font-size:22px}}
 .uploadHelp{margin:8px 0;padding:0;border:0;font-size:13px}.uploadHelp summary{color:var(--muted)}
-.trajectory .plot{height:245px}
-.curve-caption,.signal-key,.signal-key span{display:flex;align-items:center;gap:8px}
-.curve-caption{margin:8px 0;color:var(--muted);font-size:13px}
-.curve-caption b{color:var(--ink);font-weight:550}.curve-caption strong{color:var(--ink);font-size:19px}
+.trajectory .plot{height:252px}.trajectory .plot.dd{height:140px}
+.top.under{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.signal-key,.signal-key span{display:flex;align-items:center;gap:8px}
 .signal-key{flex-wrap:wrap;gap:9px 16px;margin-top:5px;color:var(--muted);font-size:12px}
 .signal-key b{color:var(--ink)}.signal-key i{width:2px;height:5px;background:var(--muted);border-radius:2px}
 .signal-key .elevated{height:7px;background:var(--amber)}.signal-key .high{width:3px;height:9px;background:var(--red)}
-.trajectory .seg{gap:2px;background:var(--tint);border-radius:6px;padding:2px}
-.trajectory .seg button{background:transparent;border-color:transparent}
-.trajectory .seg button.active{background:var(--ink);color:var(--paper)}
+.tear{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:14px}.tear2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px}
+.kv{width:100%;border-collapse:collapse;font-size:13px;margin-top:2px}.kv th,.kv td{border-bottom:1px solid var(--line);padding:4px 6px;white-space:nowrap}.kv th{text-align:left;font-weight:500;color:var(--muted)}.kv td{text-align:right;font-weight:550}
+.kv tr.group th{padding-top:12px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink);font-weight:600;border-bottom-color:var(--muted)}.kv tr.group:first-child th{padding-top:4px}
+.foot{display:block;margin-top:10px;font-size:12.5px;line-height:1.4}.monthly th,.monthly td{padding:7px 6px;font-size:13px}.monthly th:first-child{text-align:left}.neg{color:var(--red)}
+@media(max-width:1000px){.tear,.tear2{grid-template-columns:1fr}}
 #monitor .pair .plot{height:215px}.minis{display:grid;gap:8px}.minis small{display:block;margin-bottom:2px;color:var(--muted)}.minis .plot{height:96px}.legend-note{margin:0 0 6px;font-size:13px;color:var(--muted)}
-@media(max-width:760px){.trajectory .plot{height:205px}.signal-key{gap:7px 12px}}
+@media(max-width:760px){.trajectory .plot{height:205px}.trajectory .plot.dd{height:100px}.signal-key{gap:7px 12px}}
 </style></head>
 <body>
 <header><div class="brand"><svg viewBox="0 0 36 30" aria-hidden="true"><path d="M2 23h32M3 20l8-7 6 2L32 3" fill="none" stroke="currentColor" stroke-width="3"/></svg><div><h1>NAV Risk Workbench</h1><p class="lede">Daily net asset value, exposure and momentum for several accounts, scored in the browser. Explore the demo accounts or upload your own.</p></div></div><button id="theme">Dark theme</button></header>
@@ -25,7 +26,7 @@
 <nav aria-label="Workspace views"><button data-page="monitor">Account monitor</button><button data-page="market">Stocks &amp; bonds</button><button data-page="signals">Signal study</button><button data-page="lab">Slope lab</button><button data-page="settings">Scoring settings</button></nav>
 <section id="workspace"><div class="bar"><div><b id="source"></b><div class="muted" id="scope"></div></div><div class="actions"><label class="primary file">Upload data<input id="upload" type="file" accept=".xlsx,.xls,.csv" multiple></label><button id="template">Excel template</button><button id="save" title="Download a standalone HTML copy containing the current account data and settings">Save snapshot</button></div></div>
 <div class="mode"><label>Alert mode <select id="mode"><option value="strict">Strict</option><option value="normal">Normal</option></select></label><span id="modeNote"></span></div><details class="uploadHelp"><summary>How to import multiple accounts</summary><p>Select one or more CSV, XLSX or XLS files. Include <b>account</b>, <b>date</b> and a positive <b>nav</b> or <b>eq</b> column. Without an account column, the filename identifies the account. Your first import replaces the synthetic workspace. Later imports merge by account and date, with the latest incoming row winning. In Scoring settings, enable combined NAV to compare the accounts on their shared dates.</p><p>For a practice file, download the Excel template or the repository’s demo CSV. Each saved snapshot contains all loaded accounts.</p></details><output id="status" aria-live="polite"></output></section>
-<section data-view="monitor"><div class="title"><div><h2>Account monitor</h2><p>Switch accounts to inspect their NAV, exposure and flagged observations.</p></div><label>Account <select id="account"></select></label></div><div id="monitor"></div></section>
+<section data-view="monitor"><div class="title"><div><h2>Account monitor</h2><p>One account at a time: today’s level, a performance summary, NAV and drawdown, momentum, exposure, and every flagged date.</p></div><label>Account <select id="account"></select></label></div><div id="monitor"></div></section>
 <section data-view="market" hidden><div class="title"><div><h2>Stocks &amp; bonds</h2><p>How stable was the daily return correlation between SPY and IEF?</p></div></div>
 <div class="filters"><label>Period <select id="period"><option value="all">Full history · 2002–2024</option><option value="gfc">2007–2009</option><option value="covid">2020–2021</option><option value="recent">2022–2024</option></select></label><label>Rolling window <select id="window"><option value="30">30 sessions</option><option value="90">90 sessions</option><option value="252">252 sessions</option><option value="compare">Compare all three</option></select></label><button id="marketExport">Export period CSV</button></div><div id="market"></div>
 <details><summary>Source and methods</summary><p>This separate course project by Joylyn Qiao and Zun Cao aligned adjusted-close daily returns from Yahoo Finance. The embedded notebook snapshot contains 5,536 trading dates from August 1, 2002 through July 30, 2024. Windows use prior observations from the full history, even when the chart shows a shorter period. Returns are in percentage points. Daily volatility is a 30-session sample standard deviation.</p><p>Each ETF starts at 0% at the first selected close. These charts describe historical associations. <a href="https://github.com/Wirepullerrr/Comprehensive-analysis-of-U.S.-stock-and-bond-market/blob/main/Presentation%20CS329E.ipynb">Course notebook</a></p></details></section>
@@ -257,6 +258,44 @@ function autoTuneConfig(){
   SCORE_CONFIG.preset='Calibrated';
   recalculate();
 }
+// Tearsheet statistics. Every figure is computed from the loaded series only.
+function drawdownPeriods(D){
+  const out=[];let start=null,trough=null;
+  for(let i=0;i<D.length;i++){
+    const d=D[i];
+    if(d.dd<0){if(start==null){start=i-1;trough=i;}else if(d.dd<D[trough].dd)trough=i;}
+    else if(start!=null){out.push({start:D[start].date,trough:D[trough].date,end:d.date,depth:D[trough].dd,length:i-start});start=null;}
+  }
+  if(start!=null)out.push({start:D[start].date,trough:D[trough].date,end:null,depth:D[trough].dd,length:D.length-1-start});
+  return out.sort((a,b)=>a.depth-b.depth);
+}
+function monthlyReturns(D){
+  const months=new Map();
+  for(let i=1;i<D.length;i++){const d=D[i];if(d.ret==null)continue;const k=d.date.slice(0,7);months.set(k,(months.get(k)??1)*(1+d.ret));}
+  const years=new Map();
+  for(const [k,g] of months){const y=k.slice(0,4);if(!years.has(y))years.set(y,{});years.get(y)[+k.slice(5,7)]=g-1;}
+  return [...years].map(([year,m])=>({year,months:m,total:Object.values(m).reduce((p,v)=>p*(1+v),1)-1}));
+}
+function summarize(D,tradingDays=252){
+  const n=D.length;if(!n)return null;
+  const first=D[0],last=D[n-1],rets=D.slice(1).map(d=>d.ret).filter(v=>v!=null);
+  const mean=rets.length?rets.reduce((s,v)=>s+v,0)/rets.length:null,sd=std(rets);
+  const years=(n-1)/tradingDays;
+  const cagr=n>1?Math.pow(last.nav/first.nav,1/years)-1:null;
+  const downside=rets.length?Math.sqrt(rets.reduce((s,v)=>s+Math.min(0,v)**2,0)/rets.length):null;
+  const maxDD=Math.min(...D.map(d=>d.dd));
+  const var95=percentile(rets,0.05),tail=var95==null?[]:rets.filter(v=>v<=var95);
+  const periods=drawdownPeriods(D),risks=D.map(d=>d.risk).filter(v=>v!=null);
+  return {n,start:first.date,end:last.date,total:last.nav/first.nav-1,cagr,
+    vol:sd==null?null:sd*Math.sqrt(tradingDays),sharpe:sd?mean/sd*Math.sqrt(tradingDays):null,
+    sortino:downside?mean/downside*Math.sqrt(tradingDays):null,
+    maxDD,calmar:cagr!=null&&maxDD<0?cagr/Math.abs(maxDD):null,
+    best:rets.length?Math.max(...rets):null,worst:rets.length?Math.min(...rets):null,
+    winRate:rets.length?rets.filter(v=>v>0).length/rets.length:null,
+    var95,cvar95:tail.length?tail.reduce((s,v)=>s+v,0)/tail.length:null,
+    longest:periods.length?Math.max(...periods.map(p=>p.length)):0,
+    avgRisk:risks.length?risks.reduce((s,v)=>s+v,0)/risks.length:null,maxRisk:risks.length?Math.max(...risks):null};
+}
 function calcSlope(nav,w){
   const res=new Array(nav.length).fill(null);
   for(let i=w-1;i<nav.length;i++){
@@ -321,7 +360,7 @@ const originalPage = '<!doctype html>\n' + document.documentElement.outerHTML;
 const state = JSON.parse($('state').textContent);
 let SCORE_CONFIG = state.config || structuredClone(FACTORY_SCORE_CONFIG);
 let DATA, combined, active, view = location.hash === '#stockbond' ? 'market' : 'monitor';
-let navMetric = 'nav', labResult = null;
+let labResult = null;
 const charts = [];
 const ink = key => getComputedStyle(document.documentElement).getPropertyValue('--' + key).trim();
 const fmt = (v, digits=2, unit='') => v == null || !Number.isFinite(v) ? '—' : v.toFixed(digits) + unit;
@@ -405,12 +444,6 @@ function plot(id,labels,sets,opts={}){
     };
     scales.y.border={display:false};
   }
-  if(opts.dual){
-    scales.y.title={display:true,text:'Exposure (%)',color:ink('axis-forest')};
-    scales.y.ticks.color=ink('axis-forest');
-    scales.y1={position:'right',grid:{display:false},border:{display:false},
-      ticks:{color:ink('axis-fern'),maxTicksLimit:5},title:{display:true,text:'Volatility (%)',color:ink('axis-fern')}};
-  }
   charts.push(new Chart($(id),{type:'line',data:{labels,datasets:sets},plugins:opts.signalRows?[signalStrip(opts.signalRows)]:[],options:{
     animation:false,responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales,
     plugins:{legend:{display:!opts.spark&&sets.length>1,labels:{color:ink('muted'),boxWidth:23,boxHeight:1,padding:11}},
@@ -445,37 +478,41 @@ function signalStrip(rows){
 }
 function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
-  const nav=navMetric==='nav';
+  const days=Number(SCORE_CONFIG.capacity.tradingDaysPerYear)||252, s=summarize(d,days);
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
   const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>']);
-  $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div><div class="metrics">'+
-    metric('Net asset value',fmt(last.nav,4),'Peak '+fmt(Math.max(...d.map(r=>r.nav)),4),'sparkNav')+
-    metric('Drawdown',percent(last.dd),'Worst '+percent(Math.min(...d.map(r=>r.dd))),'sparkDD')+
-    metric('Exposure',fmt(last.risk,1,'%'),'Capital / equity','sparkRisk')+metric('Annualized volatility',percent(last.vol),'10-return window','sparkVol')+'</div>'+
-    '<div class="panel trajectory"><div class="top"><div><h3>Account trajectory</h3><small>'+d[0].date+' to '+last.date+'</small></div><div class="seg"><button data-nav="nav">NAV</button><button data-nav="dd">Drawdown</button></div></div>'+
-    '<div class="curve-caption"><b>'+(nav?'Net asset value':'Drawdown')+'</b><strong>'+(nav?fmt(last.nav,4):percent(last.dd))+'</strong><span>latest observation</span></div>'+
-    '<div class="plot"><canvas id="navChart" role="img" aria-label="Account trajectory with signal dates marked along the time axis"></canvas></div>'+
-    '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div></div><div class="pair">'+
-    panel('Momentum slopes','slopes','Change in NAV (%) per observation. The 3-observation slope leads; the 10-observation slope is the reference it is compared with. Select a legend line to hide or show it.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div><div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
+  const kv=(label,value)=>'<tr><th>'+label+'</th><td>'+value+'</td></tr>', group=name=>'<tr class="group"><th colspan="2">'+name+'</th></tr>';
+  const summary='<table class="kv">'+
+    group('Returns')+kv('Cumulative return',percent(s.total))+kv('Annualized return',percent(s.cagr))+kv('Best day',percent(s.best))+kv('Worst day',percent(s.worst))+kv('Positive days',percent(s.winRate))+
+    group('Risk')+kv('Annualized volatility',percent(s.vol))+kv('Sharpe ratio',fmt(s.sharpe))+kv('Sortino ratio',fmt(s.sortino))+kv('Daily VaR 95%',percent(s.var95))+kv('Daily CVaR 95%',percent(s.cvar95))+
+    group('Drawdown')+kv('Max drawdown',percent(s.maxDD))+kv('Longest drawdown',s.longest?s.longest+' obs':'—')+kv('Calmar ratio',fmt(s.calmar))+kv('Current drawdown',percent(last.dd))+
+    group('Exposure')+kv('Latest exposure',fmt(last.risk,1,'%'))+kv('Average exposure',fmt(s.avgRisk,1,'%'))+kv('Peak exposure',fmt(s.maxRisk,1,'%'))+'</table>';
+  const periods=drawdownPeriods(d).slice(0,5).map(p=>[p.start,p.trough,p.end||'<span class="pill level-Watch">Ongoing</span>',percent(p.depth),p.length]);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], pct1=v=>v==null?'—':'<span class="'+(v<0?'neg':'')+'">'+fmt(v*100,1,'%')+'</span>';
+  const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
+    monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
+  $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+
+    '<div class="tear"><div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
+    '<div class="plot"><canvas id="navChart" role="img" aria-label="Net asset value with signal dates marked along the time axis"></canvas></div>'+
+    '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div>'+
+    '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+percent(s.maxDD)+' · now '+percent(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
+    '<div class="panel summary"><h3>Performance summary</h3>'+summary+'<small class="foot">Each observation counts as one trading day; annualized figures use '+days+' per year. VaR and CVaR are the historical 5th percentile of daily returns and the mean below it. Sharpe and Sortino assume a zero risk-free rate.</small></div></div><div class="pair">'+
+    panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
+    '<div class="tear2"><div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Trough','Recovered','Depth','Length'],periods,[3,4]):'<p>No drawdown in this series.</p>')+'</div>'+
+    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div></div>'+
+    '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
     (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
-  for(const [id,key,color] of [['sparkNav','nav','s1'],['sparkDD','dd','s2'],['sparkRisk','risk','s1'],['sparkVol','vol','s3']]){
-    plot(id,labels,[line(key,d.map(r=>r[key]),color)],{spark:true});
-  }
-  plot('navChart',labels,[line(nav?'NAV':'Drawdown (%)',d.map(r=>nav?r.nav:r.dd*100),nav?'forest':'sage',{
-    borderWidth:2.8,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
+  plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
+    borderWidth:2.6,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
     fill:'start',backgroundColor:ink('curve-fill')
   })],{monitor:true,signalRows:d,afterBody:items=>{
     const r=d[items[0].dataIndex];
     return r.signals?r.level+' · '+r.score+' points\n'+r.signals.replace(/\|/g,' · '):'';
   }});
+  plot('ddChart',labels,[line('Drawdown (%)',d.map(r=>r.dd*100),'s2',{borderWidth:1.6,fill:'origin',backgroundColor:ink('dd-fill')})],{monitor:true,y:{max:0,ticks:{maxTicksLimit:4}}});
   plot('slopes',labels,slopeSets(d,SCORE_CONFIG.slope.observe),{monitor:true});
   plot('risk',labels,[line('Exposure (%)',d.map(r=>r.risk),'s1',{borderWidth:2})],{monitor:true,y:{ticks:{maxTicksLimit:3}}});
   plot('vol',labels,[line('Annualized volatility (%)',d.map(r=>r.vol==null?null:r.vol*100),'s3',{borderWidth:2})],{monitor:true,y:{ticks:{maxTicksLimit:3}}});
-  for(const b of document.querySelectorAll('[data-nav]')){
-    b.classList.toggle('active',b.dataset.nav===navMetric);
-    b.setAttribute('aria-pressed',String(b.dataset.nav===navMetric));
-    b.onclick=()=>{navMetric=b.dataset.nav;render();};
-  }
 }
 function slopeSets(rows,gap){
   return [

@@ -178,6 +178,44 @@ function autoTuneConfig(){
   SCORE_CONFIG.preset='Calibrated';
   recalculate();
 }
+// Tearsheet statistics. Every figure is computed from the loaded series only.
+function drawdownPeriods(D){
+  const out=[];let start=null,trough=null;
+  for(let i=0;i<D.length;i++){
+    const d=D[i];
+    if(d.dd<0){if(start==null){start=i-1;trough=i;}else if(d.dd<D[trough].dd)trough=i;}
+    else if(start!=null){out.push({start:D[start].date,trough:D[trough].date,end:d.date,depth:D[trough].dd,length:i-start});start=null;}
+  }
+  if(start!=null)out.push({start:D[start].date,trough:D[trough].date,end:null,depth:D[trough].dd,length:D.length-1-start});
+  return out.sort((a,b)=>a.depth-b.depth);
+}
+function monthlyReturns(D){
+  const months=new Map();
+  for(let i=1;i<D.length;i++){const d=D[i];if(d.ret==null)continue;const k=d.date.slice(0,7);months.set(k,(months.get(k)??1)*(1+d.ret));}
+  const years=new Map();
+  for(const [k,g] of months){const y=k.slice(0,4);if(!years.has(y))years.set(y,{});years.get(y)[+k.slice(5,7)]=g-1;}
+  return [...years].map(([year,m])=>({year,months:m,total:Object.values(m).reduce((p,v)=>p*(1+v),1)-1}));
+}
+function summarize(D,tradingDays=252){
+  const n=D.length;if(!n)return null;
+  const first=D[0],last=D[n-1],rets=D.slice(1).map(d=>d.ret).filter(v=>v!=null);
+  const mean=rets.length?rets.reduce((s,v)=>s+v,0)/rets.length:null,sd=std(rets);
+  const years=(n-1)/tradingDays;
+  const cagr=n>1?Math.pow(last.nav/first.nav,1/years)-1:null;
+  const downside=rets.length?Math.sqrt(rets.reduce((s,v)=>s+Math.min(0,v)**2,0)/rets.length):null;
+  const maxDD=Math.min(...D.map(d=>d.dd));
+  const var95=percentile(rets,0.05),tail=var95==null?[]:rets.filter(v=>v<=var95);
+  const periods=drawdownPeriods(D),risks=D.map(d=>d.risk).filter(v=>v!=null);
+  return {n,start:first.date,end:last.date,total:last.nav/first.nav-1,cagr,
+    vol:sd==null?null:sd*Math.sqrt(tradingDays),sharpe:sd?mean/sd*Math.sqrt(tradingDays):null,
+    sortino:downside?mean/downside*Math.sqrt(tradingDays):null,
+    maxDD,calmar:cagr!=null&&maxDD<0?cagr/Math.abs(maxDD):null,
+    best:rets.length?Math.max(...rets):null,worst:rets.length?Math.min(...rets):null,
+    winRate:rets.length?rets.filter(v=>v>0).length/rets.length:null,
+    var95,cvar95:tail.length?tail.reduce((s,v)=>s+v,0)/tail.length:null,
+    longest:periods.length?Math.max(...periods.map(p=>p.length)):0,
+    avgRisk:risks.length?risks.reduce((s,v)=>s+v,0)/risks.length:null,maxRisk:risks.length?Math.max(...risks):null};
+}
 function calcSlope(nav,w){
   const res=new Array(nav.length).fill(null);
   for(let i=w-1;i<nav.length;i++){
