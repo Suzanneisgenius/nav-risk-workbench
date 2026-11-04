@@ -1,0 +1,32 @@
+// Run the analysis code against hand-checkable fixtures without a browser or dependencies.
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const source = fs.readFileSync(path.join(__dirname, '../src/analysis.js'), 'utf8');
+const app = fs.readFileSync(path.join(__dirname, '../src/app.js'), 'utf8');
+const ctx = vm.createContext({assert, structuredClone});
+vm.runInContext(source, ctx);
+const shared = app.slice(app.indexOf('const round ='), app.indexOf('function message'));
+const combine = app.slice(app.indexOf('function combine('), app.indexOf('function recalculate'));
+vm.runInContext(shared + combine, ctx);
+vm.runInContext(`
+const SCORE_CONFIG = structuredClone(FACTORY_SCORE_CONFIG), state={mode:'strict'};
+assert.equal(levelFromScore(3),'Elevated');
+state.mode='normal'; assert.equal(levelFromScore(3),'Watch');
+assert.equal(levelFromScore(6),'High');
+const a = computeSeries([{date:'2025-01-01',nav:2},{date:'2025-01-02',nav:1.8},{date:'2025-01-03',nav:2.25}]);
+assert.equal(a[1].dd,-0.10); assert.equal(a[1].ret,-0.10);
+assert.equal(a[0].s3,null);
+assert.equal(calcSlope([2,3,4],3)[2],1);
+assert.equal(futureDrop(a,0),null);
+assert.equal(Math.round(futureDrop(a,0,2)),-10);
+const b = computeSeries([{date:'2025-01-02',nav:3},{date:'2025-01-03',nav:3.3}]);
+SCORE_CONFIG.combined.enabled=true;
+const both=combine([a,b]);
+assert.equal(both[0].date,'2025-01-02'); assert.equal(both[0].nav,1);
+assert.ok(Math.abs(both[1].nav-(1.25+1.1)/2)<1e-12);
+assert.equal(sbPearson([1,2,3],[3,2,1]),-1);
+assert.equal(statFor([a],()=>true).avg,null);
+`,ctx);
+console.log('Passed score modes, NAV, drawdown, slopes, forward windows, combined NAV and Pearson correlation.');
