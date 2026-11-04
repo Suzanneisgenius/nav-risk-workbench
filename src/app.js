@@ -56,7 +56,7 @@ function recalculate(){
   $('source').textContent=state.source;
   $('scope').textContent=names.length+' accounts · '+state.rows.length+' observations · '+(state.demo?'Generated NAV data':'Local upload');
   $('mode').value=state.mode;
-  $('modeNote').textContent='Strict alerts sooner. Normal adds 1 point to each alert cutoff. Current cutoffs (watch / elevated / high): '+['mid','elevated','critical'].map(cutoff).join(' / ')+'.';
+  $('modeNote').textContent='Cutoffs for watch / elevated / high: '+['mid','elevated','critical'].map(cutoff).join(' / ')+' points. Normal adds one point to each cutoff.';
   render();
 }
 function metric(label,value,note,spark=''){
@@ -129,8 +129,8 @@ function monitor(){
   const d=active==='combined'?combined:DATA[active.slice(8)],last=d.at(-1), labels=d.map(r=>r.date);
   const nav=navMetric==='nav';
   const latest=last.signals?last.signals.split('|').join(' · '):'No signals triggered';
-  const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—',r.level]);
-  $('monitor').innerHTML='<div class="riskline"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div><div class="metrics">'+
+  const rows=d.filter(r=>r.signals).slice(-40).reverse().map(r=>[r.date,r.score,r.signals.split('|').join(' · '),r.action||'—','<span class="pill level-'+r.level+'">'+r.level+'</span>']);
+  $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div><div class="metrics">'+
     metric('Net asset value',fmt(last.nav,4),'Peak '+fmt(Math.max(...d.map(r=>r.nav)),4),'sparkNav')+
     metric('Drawdown',percent(last.dd),'Worst '+percent(Math.min(...d.map(r=>r.dd))),'sparkDD')+
     metric('Exposure',fmt(last.risk,1,'%'),'Capital / equity','sparkRisk')+metric('Annualized volatility',percent(last.vol),'10-return window','sparkVol')+'</div>'+
@@ -174,7 +174,7 @@ function renderSignals(){
   const max=Math.max(0.0001,...law.slope_buckets.map(b=>Math.abs(b.avg||0)));
   $('signals').innerHTML='<div class="panel"><h3>Five signal families</h3><p>All-observation baseline: <b>'+fmt(law.base,2,'%')+'</b>. Statistics use the loaded individual accounts, with a complete five-observation follow-up. Repeated signals can overlap.</p>'+
     table(['Signal or comparison','Observations','Mean worst return','Worst case'],defs.map(([n,s])=>[n,s.n,fmt(s.avg,2,'%'),fmt(s.worst,2,'%')]),[1,2,3])+'</div><div class="panel"><h3>Short-slope gap</h3><p>Gap in percentage points per observation. Bars show the magnitude of the mean worst forward return. Empty buckets show a dash.</p><div class="barchart">'+
-    law.slope_buckets.map(b=>'<div class="bucket"><span>'+b.label+'</span><i style="width:'+Math.abs(b.avg||0)/max*100+'%"></i><span>'+fmt(b.avg,2,'%')+'</span></div>').join('')+'</div></div>';
+    law.slope_buckets.map(b=>'<div class="bucket"><span>'+b.label+'</span><i style="width:'+Math.abs(b.avg||0)/max*100+'%"></i><span>'+fmt(b.avg,2,'%')+(b.n?'<small>n = '+b.n+'</small>':'')+'</span></div>').join('')+'</div></div>';
 }
 function marketSlice(){
   const [start,end]=SB_PERIODS[$('period').value];
