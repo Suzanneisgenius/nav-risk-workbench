@@ -12,16 +12,20 @@
 .signal-key{flex-wrap:wrap;gap:9px 16px;margin-top:5px;color:var(--muted);font-size:12px}
 .signal-key b{color:var(--ink)}.signal-key i{width:2px;height:5px;background:var(--muted);border-radius:2px}
 .signal-key .elevated{height:7px;background:var(--amber)}.signal-key .high{width:3px;height:9px;background:var(--red)}
-.tear{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:14px}.side{display:flex;flex-direction:column;gap:14px;margin-top:12px;min-width:0}.side .panel{margin-top:0}.side .panel:last-child{flex:1}
-.summary>small{display:block;margin-top:2px}.lead{margin-top:12px;background:var(--tint);padding:14px 15px;border-radius:5px}.lead>span{font-size:13px;color:var(--muted)}.lead strong{display:block;font-size:38px;line-height:1.15;font-weight:570;letter-spacing:-.05em;color:var(--ink)}.lead small{display:block;margin-top:4px;color:var(--muted)}.lead small b{color:var(--ink);font-weight:600;margin-left:6px}
+#monitor .summary{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px 24px;align-items:center}
+#monitor .summary-head{grid-column:1/-1;padding:0;margin:0;display:flex;justify-content:space-between;gap:6px 14px}
+.summary .lead,.summary .range{margin:0}.summary .range{border:0;padding:6px 8px}.summary .lead{margin-top:0}
+.lead{margin-top:12px;background:var(--tint);padding:14px 15px;border-radius:5px}.lead>span{font-size:13px;color:var(--muted)}.lead strong{display:block;font-size:38px;line-height:1.15;font-weight:570;letter-spacing:-.05em;color:var(--ink)}.lead small{display:block;margin-top:4px;color:var(--muted)}.lead small b{color:var(--ink);font-weight:600;margin-left:6px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0;padding:16px 0 14px}.row dt{font-size:13px;color:var(--muted);font-weight:500}.row dd{margin:3px 0 0;font-weight:600;font-size:21px;letter-spacing:-.02em}
 .range{margin:0;border-top:1px solid var(--line);padding:13px 0 2px}.range figcaption{font-weight:550;margin-bottom:24px}.track{position:relative;height:3px;margin:0 3px;background:var(--line);border-radius:3px}.track i,.track b{position:absolute;top:50%;width:7px;height:7px;background:var(--ink);border-radius:50%;transform:translate(-50%,-50%)}.track i:first-child{left:0}.track i:last-child{left:100%}.track b{width:1px;height:12px;border-radius:0;background:var(--muted)}.track b em{position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:11px;line-height:1;font-style:normal;color:var(--muted)}.ends{display:flex;justify-content:space-between;margin-top:8px;font-size:13px;font-weight:600}.ends span{color:var(--muted);font-weight:500;margin-right:5px}
 .mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin:14px 0 2px}.mgrid h4{border-bottom:1px solid var(--line);padding-bottom:8px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase}.mgrid dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 14px;margin:10px 0 0}.mgrid dt{color:var(--muted);font-size:13.5px}.mgrid dd{margin:0;text-align:right;font-weight:550;font-size:13.5px;white-space:nowrap}
 .panel details.method{border:0;border-top:1px solid var(--line);border-radius:0;padding:12px 0 0;margin-top:16px}.method summary{font-size:14px}.method p{font-size:13px;margin:8px 0 0}
 .monthly th,.monthly td{padding:7px 6px;font-size:13px}.monthly th:first-child{text-align:left}.pos{color:var(--good)}.neg{color:var(--red)}
-@media(max-width:1000px){.tear{grid-template-columns:1fr}.mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:540px){.mgrid{grid-template-columns:1fr;gap:6px}.mgrid section+section{margin-top:14px}.lead strong{font-size:34px}}
+@media(max-width:1000px){#monitor .summary{grid-template-columns:1fr 1fr}.summary .range{grid-column:1/-1}.mgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:540px){#monitor .summary{grid-template-columns:1fr}.summary-head{align-items:flex-start}.summary .row{padding:6px 0}.mgrid{grid-template-columns:1fr;gap:6px}.mgrid section+section{margin-top:14px}.lead strong{font-size:34px}}
 #monitor .pair .plot{height:215px}.minis{display:grid;gap:8px}.minis small{display:block;margin-bottom:2px;color:var(--muted)}.minis .plot{height:96px}.legend-note{margin:0 0 6px;font-size:13px;color:var(--muted)}
 @media(max-width:760px){.trajectory .plot{height:205px}.trajectory .plot.dd{height:100px}.signal-key{gap:7px 12px}}
+
+.minis{grid-template-columns:minmax(0,1fr)}
 </style></head>
 <body>
 <header><div class="brand"><svg viewBox="0 0 36 30" aria-hidden="true"><path d="M2 23h32M3 20l8-7 6 2L32 3" fill="none" stroke="currentColor" stroke-width="3"/></svg><div><h1>NAV Risk Workbench</h1><p class="lede">Daily net asset value, exposure and momentum for several accounts, scored in the browser. Explore the demo accounts or upload your own.</p></div></div><button id="theme">Dark theme</button></header>
@@ -489,7 +493,7 @@ function monitor(){
   const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
   const zero=span?clamp(-s.worst/span*100,0,100):50;
   const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
-  const card='<div class="panel summary"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small>'+
+  const card='<div class="panel summary"><header class="summary-head"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small></header>'+
     '<div class="lead"><span>Cumulative return</span><strong>'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
     '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+'</div>';
   const groups=[['Returns',[['Cumulative return',signed(s.total)],['Annualized return',signed(s.cagr)],['Best day',signed(s.best)],['Worst day',signed(s.worst)],['Positive days',percent(s.winRate)]]],
@@ -503,16 +507,16 @@ function monitor(){
   const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
     monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
   $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+
-    '<div class="tear"><div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
+    card+'<div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
     '<div class="plot"><canvas id="navChart" role="img" aria-label="Net asset value with signal dates marked along the time axis"></canvas></div>'+
     '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div>'+
     '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+signed(s.maxDD)+' · now '+signed(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
-    '<div class="side">'+card+'<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div></div></div>'+
     metrics+'<div class="pair">'+
     panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
-    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>'+
     '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
-    (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
+    (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>'+
+    '<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div>'+
+    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>';
   plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
     borderWidth:2.6,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
     fill:'start',backgroundColor:ink('curve-fill')

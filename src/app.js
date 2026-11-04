@@ -129,7 +129,7 @@ function monitor(){
   const span=s.best!=null&&s.worst!=null&&s.best>s.worst?s.best-s.worst:null;
   const zero=span?clamp(-s.worst/span*100,0,100):50;
   const range=s.best==null?'':'<figure class="range"><figcaption>Daily return range</figcaption><div class="track" aria-hidden="true"><i></i><b style="left:'+zero.toFixed(2)+'%"><em>0</em></b><i></i></div><div class="ends"><div><span>Worst</span>'+signed(s.worst)+'</div><div><span>Best</span>'+signed(s.best)+'</div></div></figure>';
-  const card='<div class="panel summary"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small>'+
+  const card='<div class="panel summary"><header class="summary-head"><h3>Performance summary</h3><small>'+name+' · '+s.n+' observations</small></header>'+
     '<div class="lead"><span>Cumulative return</span><strong>'+signed(s.total)+'</strong><small>Annualized return<b>'+signed(s.cagr)+'</b></small></div>'+
     '<dl class="row"><div><dt>Annualized volatility</dt><dd>'+percent(s.vol)+'</dd></div><div><dt>Latest exposure</dt><dd>'+fmt(last.risk,1,'%')+'</dd></div></dl>'+range+'</div>';
   const groups=[['Returns',[['Cumulative return',signed(s.total)],['Annualized return',signed(s.cagr)],['Best day',signed(s.best)],['Worst day',signed(s.worst)],['Positive days',percent(s.winRate)]]],
@@ -143,16 +143,16 @@ function monitor(){
   const monthly='<div class="table"><table class="monthly"><thead><tr><th>Year</th>'+months.map(m=>'<th class="num">'+m+'</th>').join('')+'<th class="num">Year</th></tr></thead><tbody>'+
     monthlyReturns(d).map(y=>'<tr><th>'+y.year+'</th>'+months.map((_,i)=>'<td class="num">'+pct1(y.months[i+1])+'</td>').join('')+'<td class="num"><b>'+pct1(y.total)+'</b></td></tr>').join('')+'</tbody></table></div>';
   $('monitor').innerHTML='<div class="riskline level-'+last.level+'"><b class="level-'+last.level+'">'+last.level+' risk · '+last.score+' points</b>'+last.date+' · '+latest+(last.action?' · '+last.action:'')+'</div>'+
-    '<div class="tear"><div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
+    card+'<div class="panel trajectory"><div class="top"><div><h3>Net asset value</h3><small>'+s.start+' to '+s.end+' · '+s.n+' observations · latest '+fmt(last.nav,4)+'</small></div></div>'+
     '<div class="plot"><canvas id="navChart" role="img" aria-label="Net asset value with signal dates marked along the time axis"></canvas></div>'+
     '<div class="signal-key"><b>Signal strip</b><span><i></i>Low / Watch</span><span><i class="elevated"></i>Elevated</span><span><i class="high"></i>High</span></div>'+
     '<div class="top under"><div><h3>Drawdown from peak</h3><small>Worst '+signed(s.maxDD)+' · now '+signed(last.dd)+'</small></div></div><div class="plot dd"><canvas id="ddChart" role="img" aria-label="Drawdown from peak, in percent"></canvas></div></div>'+
-    '<div class="side">'+card+'<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div></div></div>'+
     metrics+'<div class="pair">'+
     panel('Momentum slopes','slopes','NAV change (%) per observation. The 3-obs slope leads; the 10-obs slope is its reference. Click a legend entry to hide a line.')+'<div class="panel"><h3>Exposure and volatility</h3><p>Capital in use, then annualized 10-return volatility, on the same dates.</p><div class="minis"><div><small>Exposure (%)</small><div class="plot"><canvas id="risk" role="img" aria-label="Exposure"></canvas></div></div><div><small>Annualized volatility (%)</small><div class="plot"><canvas id="vol" role="img" aria-label="Annualized volatility"></canvas></div></div></div></div></div>'+
-    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>'+
     '<div class="panel"><h3>Alert history</h3><p>Latest 40 flagged observations, newest first.</p>'+
-    (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>';
+    (rows.length?table(['Date','Score','Signals','Review note','Level'],rows,[1]):'<p>No signals in this series.</p>')+'</div>'+
+    '<div class="panel"><h3>Worst drawdowns</h3><p>Peak to recovery, deepest first. Length counts observations from the peak.</p>'+(periods.length?table(['Started','Recovered','Depth','Length'],periods,[2,3]):'<p>No drawdown in this series.</p>')+'</div>'+
+    '<div class="panel"><h3>Monthly returns</h3><p>Chained from the daily returns inside each calendar month.</p>'+monthly+'</div>';
   plot('navChart',labels,[line('NAV',d.map(r=>r.nav),'forest',{
     borderWidth:2.6,borderJoinStyle:'round',pointRadius:d.length===1?3:0,
     fill:'start',backgroundColor:ink('curve-fill')
